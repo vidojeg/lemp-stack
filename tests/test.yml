@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: Test
   remote_user: root
   roles:
-    - lemp-stack
+    - ../../lemp-stack

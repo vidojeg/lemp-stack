@@ -8,14 +8,9 @@
   with_items:
     - MySQL-python
     - epel-release
-
-- name: Add IUS repo
-  yum_repository:
-    name: ius
-    description: IUS YUM repo
-    baseurl: https://centos7.iuscommunity.org/ius-release.rpm
   notify:
     - Update server
+
 #
 #   NGINX
 #
@@ -30,13 +25,35 @@
 # config nginx
 - name: Config Nginx
   template:
-    src: template/nginx.conf.j2
+    src: nginx.conf.j2
     dest: /etc/nginx/conf.d/nginx.conf
     mode: 0644
+
+# open port
+- name: Open ports 80
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+
+- name: Open ports 443
+  firewalld:
+    service: https
+    permanent: true
+    state: enabled
 
 #
 #   MARIADB 10.0
 #
+
+# add mariadb repo
+- name: Add mariadb repo
+  yum_repository:
+    name: mariadb
+    description: MariaDB
+    baseurl: http://yum.mariadb.org/10.1/centos7-amd64
+    gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+    gpgcheck: yes
 
 # remove old mariadb package
 - name: Remove old mariadb
@@ -46,35 +63,50 @@
 
 # install mariadb
 - name: Install MariaDB
+  become: yes
   yum:
     name: "{{ item }}"
-    state: lastest
+    state: present
   with_items:
-    - mariadb100u
-    - mariadb100u-server
+    - MariaDB-server
+    - MariaDB-client
   notify:
     - Restart MariaDB
-    
+
 # config mariadb
 - name: Sets the root password 
   mysql_user: 
-    user: root 
-    password: "{{ mysql_root_password }}" 
-    host: localhost
+    login_user: root 
+    login_password: "{{ mysql_root_password }}" 
+    host: localhost 
+    check_implicit_admin: yes
+    name: root
+    password: "{{ mysql_root_password }}"
+    priv: '*.*:ALL,GRANT'
+
 
 - name: Deletes anonymous MySQL server user for localhost
   mysql_user: 
-    user: "" 
+    login_user: root 
+    login_password: "{{ mysql_root_password }}" 
+    host: localhost 
+    check_implicit_admin: yes
+    name: ""
     state: "absent"
 
-- name: Removes the MySQL test database
-  mysql_db: 
-    db: test 
-    state: absent
+- name: remove the MySQL test database
+  action: mysql_db login_user=root login_password="{{ mysql_root_password }}" db=test state=absent
+
 
 #
 #    PHP
 #
+
+# add webtatic repo
+- name: Add Webtatic repo fo PHP7
+  yum:
+    name: https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+    state: present
 
 # remove old version
 - name: Remove old PHP
@@ -88,15 +120,16 @@
     name: '{{ item }}'
     state: latest
   with_items:
-    - php71u
-    - php71u-fpm
-    - php71u-common
+    - php71w
+    - php71w-fpm
+    - php71w-common
 
 # config php
 - name: Config PHP
   template: 
-    src: template/php.ini.j2
+    src: php.ini.j2
     dest: /etc/php.ini
     mode: 0644
   notify:
     - Restart Nginx
+    - Restart php-fpm

@@ -1,5 +1,5 @@
 ---
 # defaults file for lemp-stack
-mysql_root_password: 'vidojenrt2013'
+mysql_root_password: vidojenrt2013
 php_memory_limit: 1024M
 php_upload_max_filesize: 128M

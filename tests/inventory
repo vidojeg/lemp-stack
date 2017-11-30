@@ -1,2 +1,1 @@
-localhost
-
+Test	ansible_host=10.0.0.107
