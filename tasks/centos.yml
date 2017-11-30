@@ -73,8 +73,12 @@
   with_items:
     - MariaDB-server
     - MariaDB-client
-  notify:
-    - Restart MariaDB
+ 
+- name: Start MariaDB
+  systemd:
+    name: mariadb
+    state: started
+    enabled: yes
 
 # config mariadb
 - name: Sets the root password 
@@ -86,7 +90,6 @@
     name: root
     password: "{{ mysql_root_password }}"
     priv: '*.*:ALL,GRANT'
-
 
 - name: Deletes anonymous MySQL server user for localhost
   mysql_user: 

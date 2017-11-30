@@ -1,12 +1,18 @@
 ---
 # handlers file for lemp-stack
+- name: Start Nginx
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+
 - name: Restart Nginx
-  service:
+  systemd:
     name: nginx
     state: restarted
 
 - name: Restart MariaDB
-  service:
+  systemd:
     name: mariadb
     state: restarted
 
@@ -16,11 +22,11 @@
     state: latest
 
 - name: Restart php-fpm
-  service:
+  systemd:
     name: php-fpm
     state: restarted
 
 - name: Reload firewalld
-  service:
+  systemd:
     name: firewalld
     state: restart

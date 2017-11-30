@@ -1,13 +1,21 @@
-
+---
+# Ubuntu 16.04 
 # install requirements
 
 # install ngnix
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
 
 # config nginx
 
-# install mariadb
-
-# config mariadb
+# install mysql
+- name: Install MySQL
+  apt:
+    name: mysql-server
+    state: present
+# config mysql
 
 # install php
 
