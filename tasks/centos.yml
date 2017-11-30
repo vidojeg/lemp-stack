@@ -23,18 +23,22 @@
   notify: 
     - Restart Nginx
 
-# open port
+# open port 80
 - name: Open ports 80
   firewalld:
     port: 80/tcp
     permanent: true
     state: enabled
 
+# open port 443
 - name: Open ports 443
   firewalld:
     port: 443/tcp
     permanent: true
     state: enabled
+
+- name: Reload Firewalld
+  shell: firewall-cmd --reload
 
 # config nginx
 - name: Config Nginx

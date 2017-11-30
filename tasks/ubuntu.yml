@@ -1,22 +1,97 @@
 ---
 # Ubuntu 16.04 
 # install requirements
+- name: Requirement package
+  become: yes
+  apt:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - python-mysqldb
+
+#
+#   NGINX
+#
 
 # install ngnix
 - name: Install Nginx
+  become: yes
   apt:
     name: nginx
     state: present
 
 # config nginx
+- name: Config Nginx
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/nginx.conf
+    mode: 0644
+  notify:
+    - Restart Nginx
+
+# linking to enable
+- name: Linking new site
+  become: yes
+  file:
+    src: /etc/nginx/sites-available/nginx.conf
+    dest: /etc/nginx/sites-enabled/nginx.conf
+    state: link
+
+#
+#   MySQL
+#
 
 # install mysql
 - name: Install MySQL
+  become: yes
   apt:
     name: mysql-server
     state: present
+
 # config mysql
+- name: Sets the root password
+  become: yes 
+  mysql_user: 
+    login_user: root 
+    login_password: "{{ mysql_root_password }}" 
+    host: localhost 
+    check_implicit_admin: yes
+    name: root
+    password: "{{ mysql_root_password }}"
+    priv: '*.*:ALL,GRANT'
+
+- name: Deletes anonymous MySQL server user for localhost
+  become: yes
+  mysql_user: 
+    login_user: root 
+    login_password: "{{ mysql_root_password }}" 
+    host: localhost 
+    check_implicit_admin: yes
+    name: ""
+    state: "absent"
+
+- name: remove the MySQL test database
+  become: yes
+  action: mysql_db login_user=root login_password="{{ mysql_root_password }}" db=test state=absent
 
 # install php
+- name: Install PHP
+  become: yes
+  apt:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - php-fpm
+    - php-mysql
 
 # config php
+- name: Config PHP
+  become: yes
+  template: 
+    src: php.ini.j2
+    dest: /etc/php/7.0/fpm/php.ini
+    mode: 0644
+  notify:
+    - Restart Nginx
+    - Restart php-fpm
