@@ -43,7 +43,7 @@
   yum:
     name: mariadb*
     state: absent
-    
+
 # install mariadb
 - name: Install MariaDB
   yum:
@@ -54,6 +54,7 @@
     - mariadb100u-server
   notify:
     - Restart MariaDB
+    
 # config mariadb
 - name: Sets the root password 
   mysql_user: 
