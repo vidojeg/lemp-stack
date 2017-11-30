@@ -19,3 +19,8 @@
   service:
     name: php-fpm
     state: restarted
+
+- name: Reload firewalld
+  service:
+    name: firewalld
+    state: restart

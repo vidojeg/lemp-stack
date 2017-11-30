@@ -22,26 +22,29 @@
     state: latest
   notify: 
     - Restart Nginx
+
+# open port
+- name: Open ports 80
+  firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+
+- name: Open ports 443
+  firewalld:
+    port: 443/tcp
+    permanent: true
+    state: enabled
+
 # config nginx
 - name: Config Nginx
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/conf.d/nginx.conf
     mode: 0644
-
-# open port
-- name: Open ports 80
-  firewalld:
-    service: http
-    permanent: true
-    state: enabled
-
-- name: Open ports 443
-  firewalld:
-    service: https
-    permanent: true
-    state: enabled
-
+  notify:
+    - Reload firewalld
+    - Restart Nginx
 #
 #   MARIADB 10.0
 #
