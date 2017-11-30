@@ -1,0 +1,101 @@
+---
+# CentOS
+# install requirements
+- name: Requirement package
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - MySQL-python
+    - epel-release
+
+- name: Add IUS repo
+  yum_repository:
+    name: ius
+    description: IUS YUM repo
+    baseurl: https://centos7.iuscommunity.org/ius-release.rpm
+  notify:
+    - Update server
+#
+#   NGINX
+#
+
+# install ngnix
+- name: Install Nginx
+  yum:
+    name: nginx
+    state: latest
+  notify: 
+    - Restart Nginx
+# config nginx
+- name: Config Nginx
+  template:
+    src: template/nginx.conf.j2
+    dest: /etc/nginx/conf.d/nginx.conf
+    mode: 0644
+
+#
+#   MARIADB 10.0
+#
+
+# remove old mariadb package
+- name: Remove old mariadb
+  yum:
+    name: mariadb*
+    state: absent
+    
+# install mariadb
+- name: Install MariaDB
+  yum:
+    name: "{{ item }}"
+    state: lastest
+  with_items:
+    - mariadb100u
+    - mariadb100u-server
+  notify:
+    - Restart MariaDB
+# config mariadb
+- name: Sets the root password 
+  mysql_user: 
+    user: root 
+    password: "{{ mysql_root_password }}" 
+    host: localhost
+
+- name: Deletes anonymous MySQL server user for localhost
+  mysql_user: 
+    user: "" 
+    state: "absent"
+
+- name: Removes the MySQL test database
+  mysql_db: 
+    db: test 
+    state: absent
+
+#
+#    PHP
+#
+
+# remove old version
+- name: Remove old PHP
+  yum:
+    name: php*
+    state: absent
+
+# install php
+- name: Install PHP-7.1
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - php71u
+    - php71u-fpm
+    - php71u-common
+
+# config php
+- name: Config PHP
+  template: 
+    src: template/php.ini.j2
+    dest: /etc/php.ini
+    mode: 0644
+  notify:
+    - Restart Nginx

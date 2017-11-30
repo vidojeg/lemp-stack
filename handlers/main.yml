@@ -1,2 +1,18 @@
 ---
 # handlers file for lemp-stack
+- name: Restart Nginx
+  service:
+    name: nginx
+    state: restarted
+    enables: yes
+
+- name: Restart MariaDB
+  service:
+    name: mariadb
+    state: restarted
+    enabled: yes
+
+- name: Update server
+  yum:
+    name: '*'
+    state: latest
