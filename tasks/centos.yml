@@ -22,6 +22,8 @@
     state: latest
   notify: 
     - Restart Nginx
+  tags:
+    - nginx
 
 # open port 80
 - name: Open ports 80
@@ -49,6 +51,8 @@
   notify:
     - Reload firewalld
     - Restart Nginx
+  tags:
+    - nginx
 #
 #   MARIADB 10.0
 #
@@ -61,12 +65,16 @@
     baseurl: http://yum.mariadb.org/10.1/centos7-amd64
     gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
     gpgcheck: yes
+  tags:
+    - mariadb
 
 # remove old mariadb package
 - name: Remove old mariadb
   yum:
     name: mariadb*
     state: absent
+  tags:
+    - mariadb
 
 # install mariadb
 - name: Install MariaDB
@@ -77,7 +85,9 @@
   with_items:
     - MariaDB-server
     - MariaDB-client
- 
+  tags:
+    - mariadb
+
 - name: Start MariaDB
   systemd:
     name: mariadb
@@ -94,6 +104,8 @@
     name: root
     password: "{{ mysql_root_password }}"
     priv: '*.*:ALL,GRANT'
+  tags:
+    - mariadb
 
 - name: Deletes anonymous MySQL server user for localhost
   mysql_user: 
@@ -103,10 +115,13 @@
     check_implicit_admin: yes
     name: ""
     state: "absent"
+  tags:
+    - mariadb
 
 - name: remove the MySQL test database
   action: mysql_db login_user=root login_password="{{ mysql_root_password }}" db=test state=absent
-
+  tags:
+    - mariadb
 
 #
 #    PHP
@@ -117,12 +132,16 @@
   yum:
     name: https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
     state: present
+  tags:
+    - php
 
 # remove old version
 - name: Remove old PHP
   yum:
     name: php*
     state: absent
+  tags:
+    - php
 
 # install php
 - name: Install PHP-7.1
@@ -133,6 +152,8 @@
     - php71w
     - php71w-fpm
     - php71w-common
+  tags:
+    - php
 
 # config php
 - name: Config PHP
@@ -143,3 +164,5 @@
   notify:
     - Restart Nginx
     - Restart php-fpm
+  tags:
+    - php

@@ -19,7 +19,9 @@
   apt:
     name: nginx
     state: present
-
+  tags:
+    - nginx
+    
 # config nginx
 - name: Config Nginx
   become: yes
@@ -29,6 +31,8 @@
     mode: 0644
   notify:
     - Restart Nginx
+  tags:
+    - nginx
 
 # linking to enable
 - name: Linking new site
@@ -37,7 +41,8 @@
     src: /etc/nginx/sites-available/nginx.conf
     dest: /etc/nginx/sites-enabled/nginx.conf
     state: link
-
+  tags:
+    - nginx
 #
 #   MySQL
 #
@@ -48,6 +53,8 @@
   apt:
     name: mysql-server
     state: present
+  tags:
+    - php
 
 # config mysql
 - name: Sets the root password
@@ -60,6 +67,8 @@
     name: root
     password: "{{ mysql_root_password }}"
     priv: '*.*:ALL,GRANT'
+  tags:
+    - php
 
 - name: Deletes anonymous MySQL server user for localhost
   become: yes
@@ -70,10 +79,14 @@
     check_implicit_admin: yes
     name: ""
     state: "absent"
+  tags:
+    - php
 
 - name: remove the MySQL test database
   become: yes
   action: mysql_db login_user=root login_password="{{ mysql_root_password }}" db=test state=absent
+  tags:
+    - php
 
 # install php
 - name: Install PHP
@@ -84,6 +97,8 @@
   with_items:
     - php-fpm
     - php-mysql
+  tags:
+    - php
 
 # config php
 - name: Config PHP
@@ -95,3 +110,5 @@
   notify:
     - Restart Nginx
     - Restart php-fpm
+  tags:
+    - php
