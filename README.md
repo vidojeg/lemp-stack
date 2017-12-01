@@ -3,10 +3,11 @@ LEMP (Linux, NGINX, MySQL, PHP)
 
 Requirements
 ------------
+```
 CentOS 7
 Ubuntu 16.04
 Ansible 2.0
-
+```
 
 Example Playbook
 ----------------
